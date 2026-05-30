@@ -1,0 +1,25 @@
+# Logs — contain real attacker data, don't commit
+logs/
+alerts/
+
+# Canary files — fake sensitive files, don't commit the actual content
+canary/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+
+# Windows
+Thumbs.db
+Desktop.ini
+*.lnk
+
+# Temp
+*.tmp
+*.log
+start.bat
+setup.done
