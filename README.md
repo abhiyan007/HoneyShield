@@ -1,6 +1,6 @@
 # 🛡 HoneyShield
 
-A multi-port deception honeypot I built for my Windows machine after getting tired of not knowing who was probing my network. It listens on 16 commonly attacked ports, captures everything attackers send (including credentials they try), looks up where they're from, and auto-blocks the persistent ones — all with a live web dashboard to watch it unfold in real time.
+A multi-port deception honeypot I built for my Windows machine after getting tired of not knowing who was probing my network. It listens on 16 commonly attacked ports, captures everything attackers send (including credentials they try), looks up where they're from, and auto-blocks the persistent ones, all with a live web dashboard to watch it unfold in real time.
 
 ![Dashboard Preview](screenshots/dashboard.png)
 
@@ -8,9 +8,9 @@ A multi-port deception honeypot I built for my Windows machine after getting tir
 
 ## Why I built this
 
-I was doing a security audit on my own PC and realized I had no visibility into who was scanning me. Windows Firewall blocks things silently — you never see what's actually hitting you. I wanted something that would let me *watch* attackers in real time, capture what tools and credentials they're using, and actually do something about the ones that won't give up.
+I was doing a security audit on my own PC and realized I had no visibility into who was scanning me. Windows Firewall blocks things silently;  you never see what's actually hitting you. I wanted something that would let me *watch* attackers in real time, capture what tools and credentials they're using, and actually do something about the ones that won't give up.
 
-So I built HoneyShield. It's been running on my machine 24/7 and the data it collects is genuinely interesting — automated bots hit common ports within hours of any IP being exposed.
+So I built HoneyShield. It's been running on my machine 24/7, and the data it collects is genuinely interesting. Automated bots hit common ports within hours of any IP being exposed.
 
 ---
 
@@ -37,7 +37,7 @@ So I built HoneyShield. It's been running on my machine 24/7 and the data it col
 | 27017 | MongoDB | Ransomware targeting open databases |
 | 8443 | HTTPS Alt | Web app scanners |
 
-**Port 80 is the crown jewel.** It serves a convincing fake NAS admin login page. When a bot or attacker submits a login form, the credentials they tried get captured and logged — you actually see the real passwords circulating in credential stuffing lists.
+**Port 80 is the crown jewel.** It serves a convincing fake NAS admin login page. When a bot or attacker submits a login form, the credentials they tried get captured and logged. You actually see the real passwords circulating on credential-stuffing lists.
 
 ---
 
@@ -143,7 +143,7 @@ Register-ScheduledTask -TaskName "HoneyShield" -Action $action -Trigger $trigger
 
 ## Canary files
 
-`canary/` contains fake sensitive files — fake passwords, SSH keys, database dumps — with Windows file system auditing (SACL) enabled. Any read access fires **Event ID 4663** in the Windows Security log. This catches a different threat than the network honeypot: an attacker who's already inside and rummaging through files.
+`canary/` contains fake sensitive files — fake passwords, SSH keys, database dumps, with Windows file system auditing (SACL) enabled. Any read access fires **Event ID 4663** in the Windows Security log. This catches a different threat than the network honeypot: an attacker who's already inside and rummaging through files.
 
 ---
 
