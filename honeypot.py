@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
-HoneyShield v2.0 — Enhanced multi-port deception honeypot
+HoneyShield v2.0 â€” Enhanced multi-port deception honeypot
 New: HTTP credential capture, geo-IP, auto-blocking, richer logging.
 """
 
@@ -20,16 +20,16 @@ ALERT     = os.path.join(BASE, "alerts", "latest.txt")
 SUMMARY   = os.path.join(BASE, "alerts", "summary.json")
 BLOCKED   = os.path.join(BASE, "alerts", "blocked_ips.txt")
 
-AUTOBLOCK_THRESHOLD = 15   # hits from one IP within window → block
+AUTOBLOCK_THRESHOLD = 15   # hits from one IP within window â†’ block
 AUTOBLOCK_WINDOW    = 600  # seconds (10 min)
 
-# ── Port definitions ─────────────────────────────────────────────────────────
+# â”€â”€ Port definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 PORTS = {
     21:    ("FTP",           b"220 FileZilla Server 1.8.2\r\n"),
     22:    ("SSH",           b"SSH-2.0-OpenSSH_9.3p1 Ubuntu-1ubuntu3.6\r\n"),
     23:    ("Telnet",        b"\xff\xfb\x01\xff\xfb\x03\xff\xfd\x18\xff\xfd\x1f"
-                              b"\r\nBlackRose NAS v3.1\r\nlogin: "),
-    25:    ("SMTP",          b"220 mail.blackrose.local ESMTP Postfix\r\n"),
+                              b"\r\nNAS Device v2.1\r\nlogin: "),
+    25:    ("SMTP",          b"220 mail.internal.local ESMTP Postfix\r\n"),
     80:    ("HTTP",          None),   # special handler
     110:   ("POP3",          b"+OK Dovecot POP3 server ready\r\n"),
     143:   ("IMAP",          b"* OK [CAPABILITY IMAP4rev1 STARTTLS] Dovecot ready.\r\n"),
@@ -53,10 +53,10 @@ PORTS = {
                               b"\xd4\x07\x00\x00\x00\x00\x00\x00"),
 }
 
-# ── Fake HTTP admin login page ───────────────────────────────────────────────
+# â”€â”€ Fake HTTP admin login page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 _HTML_LOGIN = b"""HTTP/1.1 200 OK\r\nServer: Apache/2.4.58\r\nContent-Type: text/html\r\n\r\n
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-<title>BlackRose NAS \xe2\x80\x94 Admin Login</title><style>
+<title>NAS Admin Login</title><style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0d1117;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif}
 .box{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:44px 36px;width:340px}
@@ -68,7 +68,7 @@ input:focus{outline:none;border-color:#58a6ff}
 button{width:100%;padding:11px;background:#238636;border:none;border-radius:6px;color:#fff;font-size:15px;cursor:pointer;margin-top:22px;font-weight:600}
 button:hover{background:#2ea043}
 </style></head><body><div class="box">
-<h2>\xf0\x9f\x9b\xa1 BlackRose NAS</h2>
+<h2>\xf0\x9f\x9b\xa1 NAS Admin Panel</h2>
 <div class="sub">Administration Panel</div>
 <form method="POST" action="/login">
 <label>Username</label><input name="username" autocomplete="off" autofocus>
@@ -78,7 +78,7 @@ button:hover{background:#2ea043}
 
 _HTML_FAIL = b"""HTTP/1.1 200 OK\r\nServer: Apache/2.4.58\r\nContent-Type: text/html\r\n\r\n
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-<title>BlackRose NAS \xe2\x80\x94 Admin Login</title><style>
+<title>NAS Admin Login</title><style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#0d1117;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:Arial,sans-serif}
 .box{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:44px 36px;width:340px}
@@ -89,7 +89,7 @@ label{color:#8b949e;font-size:12px;display:block;margin-bottom:4px;margin-top:14
 input{width:100%;padding:10px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:14px}
 button{width:100%;padding:11px;background:#238636;border:none;border-radius:6px;color:#fff;font-size:15px;cursor:pointer;margin-top:22px;font-weight:600}
 </style></head><body><div class="box">
-<h2>\xf0\x9f\x9b\xa1 BlackRose NAS</h2>
+<h2>\xf0\x9f\x9b\xa1 NAS Admin Panel</h2>
 <div class="sub">Administration Panel</div>
 <div class="err">\xe2\x9c\x96 Invalid username or password.</div>
 <form method="POST" action="/login">
@@ -100,7 +100,7 @@ button{width:100%;padding:11px;background:#238636;border:none;border-radius:6px;
 
 _HTTP_REDIRECT = b"HTTP/1.1 302 Found\r\nLocation: /\r\nContent-Length: 0\r\n\r\n"
 
-# ── State ────────────────────────────────────────────────────────────────────
+# â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 lock         = Lock()
 ip_hits      = defaultdict(int)
 ip_recent    = defaultdict(list)   # ip -> [timestamps] for autoblock
@@ -110,7 +110,7 @@ geo_cache    = {}
 total_hits   = 0
 start_time   = datetime.datetime.now()
 
-# ── Geo-IP (background, cached) ───────────────────────────────────────────────
+# â”€â”€ Geo-IP (background, cached) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def geo_lookup_bg(ip: str):
     with lock:
         if ip in geo_cache:
@@ -134,7 +134,7 @@ def get_geo(ip: str) -> dict:
         return {}
     return cached
 
-# ── Auto-blocking ─────────────────────────────────────────────────────────────
+# â”€â”€ Auto-blocking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def check_autoblock(ip: str):
     now = time.time()
     with lock:
@@ -165,7 +165,7 @@ def _do_block(ip: str, hit_count: int):
         f.write(entry)
     print(f"[AUTO-BLOCK] {ip}  {status}", flush=True)
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def ts():
     return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -193,7 +193,7 @@ def win_toast(title: str, msg: str):
     except Exception:
         pass
 
-# ── Core event logger ─────────────────────────────────────────────────────────
+# â”€â”€ Core event logger â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def log_event(port, service, src_ip, src_port, data: bytes, creds=None):
     global total_hits
     timestamp = ts()
@@ -228,7 +228,7 @@ def log_event(port, service, src_ip, src_port, data: bytes, creds=None):
 
     # Human log
     loc = f"  [{geo_str}]" if geo_str else ""
-    line = (f"[{timestamp}] #{hit_num:05d}  {src_ip}:{src_port} → :{port} ({service})"
+    line = (f"[{timestamp}] #{hit_num:05d}  {src_ip}:{src_port} â†’ :{port} ({service})"
             f"  hits={ip_count}{loc}")
     if creds:
         line += f"\n              CREDS: user={creds.get('username','?')}  pass={creds.get('password','?')}"
@@ -241,7 +241,7 @@ def log_event(port, service, src_ip, src_port, data: bytes, creds=None):
         json.dump(event, f, ensure_ascii=False); f.write("\n")
     if creds:
         with open(CRED_LOG, "a", encoding="utf-8") as f:
-            f.write(f"[{timestamp}] {src_ip}:{src_port} → :{port}  "
+            f.write(f"[{timestamp}] {src_ip}:{src_port} â†’ :{port}  "
                     f"user={creds.get('username','?')}  pass={creds.get('password','?')}"
                     f"{loc}\n")
 
@@ -249,7 +249,7 @@ def log_event(port, service, src_ip, src_port, data: bytes, creds=None):
     with open(ALERT, "w", encoding="utf-8") as f:
         f.write(f"Last hit  : {timestamp}\nFrom      : {src_ip}:{src_port}\n"
                 f"Port      : {port} ({service})\nIP hits   : {ip_count}\n"
-                f"Total     : {hit_num}\nLocation  : {geo_str or '—'}\n")
+                f"Total     : {hit_num}\nLocation  : {geo_str or 'â€”'}\n")
         if creds:
             f.write(f"CREDS     : {creds}\n")
 
@@ -262,17 +262,17 @@ def log_event(port, service, src_ip, src_port, data: bytes, creds=None):
                    "last_port": f"{port} ({service})", "last_geo": geo_str,
                    "blocked_count": len(blocked_ips)}, f, indent=2)
 
-    print(f"[HIT] {timestamp}  {src_ip}:{src_port} → :{port} ({service})"
+    print(f"[HIT] {timestamp}  {src_ip}:{src_port} â†’ :{port} ({service})"
           + (f"  [{country}]" if country else "")
           + (f"  CREDS:{creds}" if creds else ""), flush=True)
 
     if ip_count == 1:
         loc_short = f" [{country}]" if country else ""
-        win_toast("HoneyShield HIT", f"{src_ip}{loc_short} → port {port} ({service})")
+        win_toast("HoneyShield HIT", f"{src_ip}{loc_short} â†’ port {port} ({service})")
 
     check_autoblock(src_ip)
 
-# ── HTTP handler (port 80) ────────────────────────────────────────────────────
+# â”€â”€ HTTP handler (port 80) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def handle_http(conn: socket.socket, addr, port: int):
     src_ip, src_port = addr[0], addr[1]
     raw = b""
@@ -329,7 +329,7 @@ def handle_http(conn: socket.socket, addr, port: int):
 
     log_event(port, "HTTP", src_ip, src_port, raw[:512], creds if creds else None)
 
-# ── Generic handler ───────────────────────────────────────────────────────────
+# â”€â”€ Generic handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def handle_conn(conn: socket.socket, addr, port: int, service: str, banner: bytes):
     if port == 80:
         handle_http(conn, addr, port)
@@ -360,7 +360,7 @@ def handle_conn(conn: socket.socket, addr, port: int, service: str, banner: byte
 
     log_event(port, service, src_ip, src_port, data)
 
-# ── Port listener ─────────────────────────────────────────────────────────────
+# â”€â”€ Port listener â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def listen(port: int, service: str, banner):
     try:
         srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -379,23 +379,23 @@ def listen(port: int, service: str, banner):
                              daemon=True).start()
         except: break
 
-# ── Status printer ────────────────────────────────────────────────────────────
+# â”€â”€ Status printer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def status_loop():
     while True:
         time.sleep(300)
         with lock:
             n, ui, nb = total_hits, len(ip_hits), len(blocked_ips)
             top = sorted(ip_hits.items(), key=lambda x: -x[1])[:3]
-        t = ", ".join(f"{ip}×{c}" for ip, c in top) or "none"
+        t = ", ".join(f"{ip}Ã—{c}" for ip, c in top) or "none"
         print(f"[STATUS] {ts()}  hits={n}  ips={ui}  blocked={nb}  top: {t}", flush=True)
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def main():
-    print("═" * 55)
-    print("  HoneyShield v2.0  —  Enhanced Deception Honeypot")
+    print("â•" * 55)
+    print("  HoneyShield v2.0  â€”  Enhanced Deception Honeypot")
     print(f"  Started : {ts()}")
     print(f"  Auto-block threshold : {AUTOBLOCK_THRESHOLD} hits / {AUTOBLOCK_WINDOW}s")
-    print("═" * 55 + "\n")
+    print("â•" * 55 + "\n")
 
     for port, (service, banner) in sorted(PORTS.items()):
         threading.Thread(target=listen, args=(port, service, banner),
@@ -415,3 +415,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

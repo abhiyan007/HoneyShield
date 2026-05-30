@@ -86,7 +86,7 @@ Six tabs covering everything:
 **Requirements:** Python 3.x on Windows. No pip installs needed — everything uses the standard library.
 
 ```bash
-git clone https://github.com/blackrose007/HoneyShield.git
+git clone https://github.com/abhiyan007/HoneyShield.git
 cd HoneyShield
 ```
 
